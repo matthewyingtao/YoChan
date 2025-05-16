@@ -6,7 +6,6 @@
 		"lib": ["es2022"],
 		"module": "NodeNext",
 		"moduleDetection": "force",
-		"noEmit": true,
 		"noImplicitOverride": true,
 		"noUncheckedIndexedAccess": true,
 		"rootDir": "./src",

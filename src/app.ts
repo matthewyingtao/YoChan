@@ -6,6 +6,8 @@ import sharp from "sharp";
 const app = express();
 const uploadHandler = multer({});
 
+const uploadsDir = path.join(__dirname, "..", "uploads");
+
 app.get("/", (req, res) => {
 	res.send(`
         <form action="/" method="post" enctype="multipart/form-data">
@@ -23,11 +25,11 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 		return;
 	}
 
-	const image = await sharp(file.buffer)
-		.grayscale()
-		.toFile(path.join(path.dirname(__dirname), "uploads", file.originalname));
+	const outputPath = path.join(uploadsDir, file.originalname);
 
-	console.log(path.join(path.dirname(__dirname), "uploads", file.originalname));
+	const image = await sharp(file.buffer).grayscale().toFile(outputPath);
+
+	console.log(outputPath);
 
 	res.send(`
         <p>File Path: <a href="${new URL(
@@ -39,11 +41,15 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 
 app.get("/uploads/:filename", (req, res) => {
 	const filename = req.params.filename;
-	const filePath = `uploads/${filename}`;
+	const filePath = path.join(uploadsDir, filename);
 
-	console.log(`File Path: ${filePath}`);
-
-	res.sendFile(filePath, { root: path.dirname(__dirname) });
+	res.sendFile(filePath, (err) => {
+		if (err) {
+			res.status(400).end();
+		} else {
+			console.log(`Sent: ${filePath}`);
+		}
+	});
 });
 
 app.listen(3000, () => {

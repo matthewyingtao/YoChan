@@ -147,16 +147,22 @@ app.get("/uploads/:filename", (req, res) => {
 	});
 });
 
-app.get("/uploads", (req, res) => {
-	const files = fs.readdirSync(uploadsDir);
+if (process.env.NODE_ENV !== "production") {
+	console.log("Development mode: allowing file listing");
 
-	res.json({
-		files: files.map((file) => ({
-			url: new URL(`/uploads/${file}`, req.protocol + "://" + req.get("host")),
-		})),
+	app.get("/uploads", (req, res) => {
+		const files = fs.readdirSync(uploadsDir);
+
+		res.json({
+			files: files.map((file) => ({
+				url: new URL(
+					`/uploads/${file}`,
+					req.protocol + "://" + req.get("host")
+				),
+			})),
+		});
 	});
-});
-
+}
 app.listen(3000, () => {
 	console.log(`Server is running on port 3000`);
 });

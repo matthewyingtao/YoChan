@@ -13,86 +13,6 @@ import {
 const app = express();
 const uploadHandler = multer({});
 
-app.get("/", (req, res) => {
-	res.send(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8" />
-            <title>Image Upload with Transformations</title>
-        </head>
-        <body>
-            <form id="uploadForm" action="/" method="post" enctype="multipart/form-data">
-                <input type="file" name="file" id="file" required />
-                <br /><br />
-
-                <!-- Thumbnail -->
-                <label>
-                    <input type="checkbox" id="useThumbnail" />
-                    Thumbnail size (px):
-                    <input type="number" id="thumbnail" min="1" max="10000" value="300" />
-                </label>
-                <br />
-
-                <!-- JPEG Quality -->
-                <label>
-                    <input type="checkbox" id="useJpeg" />
-                    JPEG quality:
-                    <input type="range" id="asJpeg" min="1" max="100" value="80" />
-                    <span id="jpegValue">80</span>
-                </label>
-                <br />
-
-                <!-- WebP Quality -->
-                <label>
-                    <input type="checkbox" id="useWebp" />
-                    WebP quality:
-                    <input type="range" id="asWebp" min="1" max="100" value="80" />
-                    <span id="webpValue">80</span>
-                </label>
-                <br /><br />
-
-                <input type="submit" value="Upload" name="submit" />
-            </form>
-
-            <script>
-                const form = document.getElementById("uploadForm");
-
-                // Display current range values
-                const updateLabel = (id, value) => {
-                    document.getElementById(id).textContent = value;
-                };
-                document.getElementById("asJpeg").addEventListener("input", (e) => updateLabel("jpegValue", e.target.value));
-                document.getElementById("asWebp").addEventListener("input", (e) => updateLabel("webpValue", e.target.value));
-
-                form.addEventListener("submit", (e) => {
-                    const queryParams = new URLSearchParams();
-
-                    if (document.getElementById("useThumbnail").checked) {
-                        const val = document.getElementById("thumbnail").value;
-                        if (val) queryParams.append("thumbnail", val);
-                    }
-
-                    if (document.getElementById("useJpeg").checked) {
-                        const val = document.getElementById("asJpeg").value;
-                        if (val) queryParams.append("asJpeg", val);
-                    }
-
-                    if (document.getElementById("useWebp").checked) {
-                        const val = document.getElementById("asWebp").value;
-                        if (val) queryParams.append("asWebp", val);
-                    }
-
-                    // Apply query parameters to action URL
-                    const baseAction = form.getAttribute("action").split("?")[0];
-                    form.setAttribute("action", \`\${baseAction}?\${queryParams.toString()}\`);
-                });
-            </script>
-        </body>
-        </html>
-    `);
-});
-
 app.post("/", uploadHandler.single("file"), async (req, res) => {
 	// first authenticate the request from their key param
 	const qp = req.query;
@@ -160,23 +80,6 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 });
 
 app.use("/uploads", express.static(config.UPLOADS_DIR));
-
-if (process.env.NODE_ENV !== "production") {
-	console.log("Development mode: allowing file listing");
-
-	app.get("/uploads", (req, res) => {
-		const files = fs.readdirSync(config.UPLOADS_DIR);
-
-		res.json({
-			files: files.map((file) => ({
-				url: new URL(
-					`/uploads/${file}`,
-					req.protocol + "://" + req.get("host")
-				),
-			})),
-		});
-	});
-}
 
 app.listen(config.PORT, () => {
 	console.log(`Server is running on port ${config.PORT}`);

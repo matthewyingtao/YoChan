@@ -149,9 +149,6 @@ app.get("/uploads/:filename", (req, res) => {
 
 app.get("/uploads", (req, res) => {
 	const files = fs.readdirSync(uploadsDir);
-	const fileLinks = files
-		.map((file) => `<li><a href="/uploads/${file}">${file}</a></li>`)
-		.join("");
 
 	res.json({
 		files: files.map((file) => ({

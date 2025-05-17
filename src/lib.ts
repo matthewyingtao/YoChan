@@ -16,7 +16,7 @@ const transformations: Record<
 	TransformationKey,
 	(img: Sharp, value: any) => Sharp
 > = {
-	thumbnail: (img, size) => img.resize(size, size, { fit: "contain" }),
+	thumbnail: (img, size) => img.resize(size, size, { fit: "inside" }),
 	asJpeg: (img, quality) => img.jpeg({ quality }),
 	asWebp: (img, quality) => img.webp({ quality }),
 };

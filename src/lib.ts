@@ -1,4 +1,5 @@
 import type { Sharp } from "sharp";
+import sharp from "sharp";
 import z from "zod";
 
 export const transformationSchemas = {
@@ -33,4 +34,12 @@ export function applyTransformation(
 		throw new Error(`Invalid value for ${type}: ${messages}`);
 	}
 	return transformations[type](img, result.data);
+}
+
+// Ideally we would use img.metadata() to get the format,
+// but it doesn't take into account the transformations.
+export async function getResultFormat(img: Sharp) {
+	const outputBuffer = await img.toBuffer();
+	const metadata = await sharp(outputBuffer).metadata();
+	return metadata.format;
 }

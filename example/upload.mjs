@@ -21,6 +21,7 @@ if (options.asJpeg.use) queryParams.append("asJpeg", options.asJpeg.value);
 if (options.asWebp.use) queryParams.append("asWebp", options.asWebp.value);
 
 queryParams.append("key", "your_api_key_here"); // Replace with your actual API key
+queryParams.append("purpose", "food"); // Replace with your purpose
 
 const response = await fetch(
 	`http://localhost:3000/?${queryParams.toString()}`,

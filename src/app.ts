@@ -82,9 +82,49 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 			new URL(
 				`/uploads/${purpose}/${fileName}`,
 				req.protocol + "://" + req.get("host")
-			)
+			).toString()
 		)
 	);
+});
+
+app.delete("/", (req, res) => {
+	// first authenticate the request from their key param
+	const qp = req.query;
+
+	const apiKey = qp.key;
+
+	if (!qp.key) {
+		res
+			.status(401)
+			.json(
+				ErrorResponse(
+					"Unauthorized. Please provide your api key as a query parameter e.g. `?key=[]`."
+				)
+			);
+		return;
+	}
+
+	if (apiKey !== config.API_KEY) {
+		res.status(403).json(ErrorResponse("Forbidden. Invalid API key."));
+		return;
+	}
+
+	// qp.path = http://localhost:3000/uploads/food/89e15078-5031-49b9-ac87-81159cc3e066.jpeg
+	// we want /food/89e15078-5031-49b9-ac87-81159cc3e066.jpeg
+	const pathName = new URL(qp.path as string).pathname; // /uploads/food/89e15078-5031-49b9-ac87-81159cc3e066.jpeg
+	const pathToDelete = pathName.replace(/^\/uploads/, "");
+
+	const filePath = path.join(config.UPLOADS_DIR, pathToDelete);
+
+	// check if the file exists
+	if (!fs.existsSync(filePath)) {
+		res.status(404).json(ErrorResponse("File not found."));
+		return;
+	}
+
+	// delete the file
+	fs.unlinkSync(filePath);
+	res.json(SuccessResponse("File deleted successfully."));
 });
 
 // serve the uploads directory

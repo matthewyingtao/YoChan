@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import fs from "fs";
 import multer from "multer";
@@ -115,8 +116,8 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 	}
 
 	// then check if the file is valid
-
 	const file = req.file;
+
 	if (!file) {
 		res.status(400).send("No file uploaded.");
 		return;
@@ -125,7 +126,7 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 	let img = sharp(file.buffer);
 
 	// apply transformations
-	for (const [key, val] of Object.entries(req.query)) {
+	for (const [key, val] of Object.entries(qp)) {
 		// check if the key is a valid transformation key
 		if (!isTransformationKey(key)) continue;
 

@@ -27,6 +27,8 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 		.grayscale()
 		.toFile(path.join(path.dirname(__dirname), "uploads", file.originalname));
 
+	console.log(path.join(path.dirname(__dirname), "uploads", file.originalname));
+
 	res.send(`
         <p>File Path: <a href="${new URL(
 					`/uploads/${file.originalname}`,

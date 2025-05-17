@@ -1,9 +1,9 @@
-import "dotenv/config";
 import express from "express";
 import fs from "fs";
 import multer from "multer";
 import path from "path";
 import sharp from "sharp";
+import { config } from "./config";
 import {
 	applyTransformation,
 	getResultFormat,
@@ -110,7 +110,7 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 		return;
 	}
 
-	if (apiKey !== process.env.API_KEY) {
+	if (apiKey !== config.API_KEY) {
 		res.status(403).send("Forbidden. Invalid API key.");
 		return;
 	}
@@ -183,6 +183,6 @@ if (process.env.NODE_ENV !== "production") {
 	});
 }
 
-app.listen(3000, () => {
-	console.log(`Server is running on port 3000`);
+app.listen(config.PORT, () => {
+	console.log(`Server is running on port ${config.PORT}`);
 });

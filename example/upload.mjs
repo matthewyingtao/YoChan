@@ -33,3 +33,21 @@ const response = await fetch(
 
 const res = await response.json(); // or .json() if your server responds with JSON
 console.log(res);
+
+// wait for 2 seconds before deleting the file
+await new Promise((resolve) => setTimeout(resolve, 2000)); // wait for 2 seconds
+
+// delete the file after upload
+const deleteQueryParams = new URLSearchParams();
+deleteQueryParams.append("key", "your_api_key_here"); // Replace with your actual API key
+deleteQueryParams.append("path", res.imageUrl);
+
+const deleteResponse = await fetch(
+	`http://localhost:3000/?${deleteQueryParams.toString()}`,
+	{
+		method: "DELETE",
+	}
+);
+
+const deleteRes = await deleteResponse.json(); // or .json() if your server responds with JSON
+console.log(deleteRes);

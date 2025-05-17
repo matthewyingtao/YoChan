@@ -2,9 +2,9 @@ import type { Sharp } from "sharp";
 import z from "zod";
 
 export const transformationSchemas = {
-	thumbnail: z.number().min(1).max(10000),
-	asJpeg: z.number().min(1).max(100),
-	asWebp: z.number().min(1).max(100),
+	thumbnail: z.coerce.number().min(1).max(10000),
+	asJpeg: z.coerce.number().min(1).max(100),
+	asWebp: z.coerce.number().min(1).max(100),
 } as const;
 
 type TransformationKey = keyof typeof transformationSchemas;

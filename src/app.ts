@@ -6,8 +6,10 @@ import sharp from "sharp";
 import { config } from "./config";
 import {
 	applyTransformation,
+	ErrorResponse,
 	getResultFormat,
 	isTransformationKey,
+	SuccessResponse,
 } from "./lib";
 
 const app = express();
@@ -22,14 +24,16 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 	if (!qp.key) {
 		res
 			.status(401)
-			.send(
-				"Unauthorized. Please provide your api key as a query parameter `?key=[]`."
+			.json(
+				ErrorResponse(
+					"Unauthorized. Please provide your api key as a query parameter e.g. `?key=[]`."
+				)
 			);
 		return;
 	}
 
 	if (apiKey !== config.API_KEY) {
-		res.status(403).send("Forbidden. Invalid API key.");
+		res.status(403).json(ErrorResponse("Forbidden. Invalid API key."));
 		return;
 	}
 
@@ -37,7 +41,7 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 	const file = req.file;
 
 	if (!file) {
-		res.status(400).send("No file uploaded.");
+		res.status(400).json(ErrorResponse("No file uploaded."));
 		return;
 	}
 
@@ -51,7 +55,9 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 		try {
 			img = applyTransformation(img, key, val);
 		} catch (err) {
-			res.status(400).send(`Error in "${key}": ${(err as Error).message}`);
+			res
+				.status(400)
+				.json(ErrorResponse(`Error in "${key}": ${(err as Error).message}`));
 			return;
 		}
 	}
@@ -71,14 +77,17 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 	// save the file
 	await img.toFile(outputPath);
 
-	res.json({
-		imageUrl: new URL(
-			`/uploads/${purpose}/${fileName}`,
-			req.protocol + "://" + req.get("host")
-		),
-	});
+	res.json(
+		SuccessResponse(
+			new URL(
+				`/uploads/${purpose}/${fileName}`,
+				req.protocol + "://" + req.get("host")
+			)
+		)
+	);
 });
 
+// serve the uploads directory
 app.use("/uploads", express.static(config.UPLOADS_DIR));
 
 app.listen(config.PORT, () => {

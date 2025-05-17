@@ -3,7 +3,11 @@ import fs from "fs";
 import multer from "multer";
 import path from "path";
 import sharp from "sharp";
-import { applyTransformation, isTransformationKey } from "./lib";
+import {
+	applyTransformation,
+	getResultFormat,
+	isTransformationKey,
+} from "./lib";
 
 const app = express();
 const uploadHandler = multer({});
@@ -90,13 +94,28 @@ app.get("/", (req, res) => {
     `);
 });
 
-const getResultFormat = async (img: sharp.Sharp) => {
-	const outputBuffer = await img.toBuffer();
-	const metadata = await sharp(outputBuffer).metadata();
-	return metadata.format;
-};
-
 app.post("/", uploadHandler.single("file"), async (req, res) => {
+	// first authenticate the request from their key param
+	const qp = req.query;
+
+	const apiKey = qp.key;
+
+	if (!qp.key) {
+		res
+			.status(401)
+			.send(
+				"Unauthorized. Please provide your api key as a query parameter `?key=[]`."
+			);
+		return;
+	}
+
+	if (apiKey !== process.env.API_KEY) {
+		res.status(403).send("Forbidden. Invalid API key.");
+		return;
+	}
+
+	// then check if the file is valid
+
 	const file = req.file;
 	if (!file) {
 		res.status(400).send("No file uploaded.");
@@ -105,23 +124,21 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 
 	let img = sharp(file.buffer);
 
+	// apply transformations
 	for (const [key, val] of Object.entries(req.query)) {
 		// check if the key is a valid transformation key
 		if (!isTransformationKey(key)) continue;
 
-		console.log(`Applying transformation: ${key} with value: ${val}`);
-
 		try {
 			img = applyTransformation(img, key, val);
 		} catch (err) {
-			console.error(err);
 			res.status(400).send(`Error in "${key}": ${(err as Error).message}`);
 			return;
 		}
 	}
 
+	// generate a random file name and save the file
 	const uuid = crypto.randomUUID();
-
 	const fileName = `${uuid}.${await getResultFormat(img)}`;
 	const outputPath = path.join(uploadsDir, fileName);
 	await img.toFile(outputPath);

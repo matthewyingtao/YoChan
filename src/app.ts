@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import sharp from "sharp";
+import { applyTransformation, isTransformationKey } from "./lib";
 
 const app = express();
 const uploadHandler = multer({});
@@ -19,24 +20,35 @@ app.get("/", (req, res) => {
 
 app.post("/", uploadHandler.single("file"), async (req, res) => {
 	const file = req.file;
-
 	if (!file) {
 		res.status(400).send("No file uploaded.");
 		return;
 	}
 
+	let img = sharp(file.buffer).grayscale();
+
+	for (const [key, val] of Object.entries(req.query)) {
+		// check if the key is a valid transformation key
+		if (!isTransformationKey(key)) continue;
+
+		try {
+			img = applyTransformation(img, key, val);
+		} catch (err) {
+			console.error(err);
+			res.status(400).send(`Error in "${key}": ${(err as Error).message}`);
+			return;
+		}
+	}
+
 	const outputPath = path.join(uploadsDir, file.originalname);
+	await img.toFile(outputPath);
 
-	const image = await sharp(file.buffer).grayscale().toFile(outputPath);
-
-	console.log(outputPath);
-
-	res.send(`
-        <p>File Path: <a href="${new URL(
-					`/uploads/${file.originalname}`,
-					req.protocol + "://" + req.get("host")
-				)}">${file.originalname}</a></p>
-    `);
+	res.json({
+		imageUrl: new URL(
+			`/uploads/${file.originalname}`,
+			req.protocol + "://" + req.get("host")
+		),
+	});
 });
 
 app.get("/uploads/:filename", (req, res) => {

@@ -43,3 +43,31 @@ export async function getResultFormat(img: Sharp) {
 	const metadata = await sharp(outputBuffer).metadata();
 	return metadata.format;
 }
+
+type ErrorResponse = {
+	success: false;
+	error: {
+		message: string;
+	};
+};
+
+type SuccessResponse = {
+	success: true;
+	imageUrl: URL;
+};
+
+export function ErrorResponse(message: string): ErrorResponse {
+	return {
+		success: false,
+		error: {
+			message,
+		},
+	};
+}
+
+export function SuccessResponse(imageUrl: URL): SuccessResponse {
+	return {
+		success: true,
+		imageUrl,
+	};
+}

@@ -13,8 +13,6 @@ import {
 const app = express();
 const uploadHandler = multer({});
 
-const uploadsDir = path.join(__dirname, "..", "uploads");
-
 app.get("/", (req, res) => {
 	res.send(`
         <!DOCTYPE html>
@@ -141,36 +139,33 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 	// generate a random file name and save the file
 	const uuid = crypto.randomUUID();
 	const fileName = `${uuid}.${await getResultFormat(img)}`;
-	const outputPath = path.join(uploadsDir, fileName);
+
+	// allows the user to specify a folder to save the file in, so that they can group images
+	const purpose = qp.purpose ?? "_misc";
+
+	const outputPath = path.join(config.UPLOADS_DIR, String(purpose), fileName);
+
+	// create the directory if it doesn't exist
+	fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+
 	// save the file
 	await img.toFile(outputPath);
 
 	res.json({
 		imageUrl: new URL(
-			`/uploads/${fileName}`,
+			`/uploads/${purpose}/${fileName}`,
 			req.protocol + "://" + req.get("host")
 		),
 	});
 });
 
-app.get("/uploads/:filename", (req, res) => {
-	const filename = req.params.filename;
-	const filePath = path.join(uploadsDir, filename);
-
-	res.sendFile(filePath, (err) => {
-		if (err) {
-			res.status(400).end();
-		} else {
-			console.log(`Sent: ${filePath}`);
-		}
-	});
-});
+app.use("/uploads", express.static(config.UPLOADS_DIR));
 
 if (process.env.NODE_ENV !== "production") {
 	console.log("Development mode: allowing file listing");
 
 	app.get("/uploads", (req, res) => {
-		const files = fs.readdirSync(uploadsDir);
+		const files = fs.readdirSync(config.UPLOADS_DIR);
 
 		res.json({
 			files: files.map((file) => ({

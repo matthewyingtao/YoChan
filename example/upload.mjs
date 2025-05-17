@@ -1,0 +1,34 @@
+import "dotenv/config";
+import { openAsBlob } from "node:fs";
+
+const options = {
+	filePath: "./example.png",
+	thumbnail: { use: true, value: 300 },
+	asJpeg: { use: true, value: 80 },
+	asWebp: { use: false, value: 80 },
+};
+
+const blob = await openAsBlob(options.filePath);
+
+const formData = new FormData();
+formData.append("file", blob);
+
+const queryParams = new URLSearchParams();
+
+if (options.thumbnail.use)
+	queryParams.append("thumbnail", options.thumbnail.value);
+if (options.asJpeg.use) queryParams.append("asJpeg", options.asJpeg.value);
+if (options.asWebp.use) queryParams.append("asWebp", options.asWebp.value);
+
+queryParams.append("key", "your_api_key_here"); // Replace with your actual API key
+
+const response = await fetch(
+	`http://localhost:3000/?${queryParams.toString()}`,
+	{
+		method: "POST",
+		body: formData,
+	}
+);
+
+const res = await response.json(); // or .json() if your server responds with JSON
+console.log(res);

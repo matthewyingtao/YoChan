@@ -141,6 +141,7 @@ app.post("/", uploadHandler.single("file"), async (req, res) => {
 	const uuid = crypto.randomUUID();
 	const fileName = `${uuid}.${await getResultFormat(img)}`;
 	const outputPath = path.join(uploadsDir, fileName);
+	// save the file
 	await img.toFile(outputPath);
 
 	res.json({

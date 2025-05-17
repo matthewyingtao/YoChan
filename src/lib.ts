@@ -53,7 +53,7 @@ type ErrorResponse = {
 
 type SuccessResponse = {
 	success: true;
-	imageUrl: URL;
+	imageUrl: string;
 };
 
 export function ErrorResponse(message: string): ErrorResponse {
@@ -65,7 +65,7 @@ export function ErrorResponse(message: string): ErrorResponse {
 	};
 }
 
-export function SuccessResponse(imageUrl: URL): SuccessResponse {
+export function SuccessResponse(imageUrl: string): SuccessResponse {
 	return {
 		success: true,
 		imageUrl,

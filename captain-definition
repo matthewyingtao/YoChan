@@ -8,8 +8,9 @@
 		"RUN npm install",
 		"COPY . /usr/src/app",
 		"RUN npm run build",
-		"RUN ls -la /usr/src/app/",
 		"RUN mkdir -p uploads",
+		"RUN ls -la /usr/src/app/",
+		"RUN ls -la .",
 		"ENV NODE_ENV production",
 		"EXPOSE 3000",
 		"CMD [ \"npm\", \"start\" ]"

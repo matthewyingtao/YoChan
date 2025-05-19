@@ -1,24 +1,22 @@
-import staticPlugin from "@elysiajs/static";
-import { Elysia, status, t } from "elysia";
-import { mkdirSync, readdirSync } from "node:fs";
+import { Elysia, file, status, t } from "elysia";
+import { mkdirSync } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
 import { config } from "./config";
 import { ErrorResponse, getResultFormat, SuccessResponse } from "./lib";
 
 const app = new Elysia()
-	.use(
-		staticPlugin({
-			assets: config.UPLOADS_DIR,
-			prefix: "/uploads",
-			staticLimit: 0,
-		})
-	)
-	.get("/files", () =>
-		readdirSync(config.UPLOADS_DIR, {
-			recursive: true,
-		})
-	)
+	.get("/uploads/*", async ({ params: { "*": url } }) => {
+		const filePath = path.join(config.UPLOADS_DIR, url);
+
+		const imgFile = file(filePath);
+
+		if (!imgFile.length) {
+			return status(404, ErrorResponse("File not found."));
+		}
+
+		return file(filePath);
+	})
 	.get("/", () => "Yo Chan is running and ready to gyu!")
 	.post(
 		"/",

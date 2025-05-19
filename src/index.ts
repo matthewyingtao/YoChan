@@ -71,6 +71,9 @@ const app = new Elysia()
 				fileName
 			);
 
+			console.log(`upload folder is at ${config.UPLOADS_DIR}`);
+			console.log(`Saving file to ${outputPath}`);
+
 			mkdirSync(path.dirname(outputPath), { recursive: true });
 
 			await img.toFile(outputPath);

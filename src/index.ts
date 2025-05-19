@@ -1,4 +1,4 @@
-import { Elysia, file, status, t } from "elysia";
+import { Elysia, status, t } from "elysia";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
@@ -9,13 +9,13 @@ const app = new Elysia()
 	.get("/uploads/*", async ({ params: { "*": url } }) => {
 		const filePath = path.join(config.UPLOADS_DIR, url);
 
-		const imgFile = file(filePath);
+		const imgFile = Bun.file(filePath);
 
-		if (!imgFile.length) {
+		if (!imgFile.exists()) {
 			return status(404, ErrorResponse("File not found."));
 		}
 
-		return file(filePath);
+		return imgFile;
 	})
 	.get("/", () => "Yo Chan is running and ready to gyu!")
 	.post(

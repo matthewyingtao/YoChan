@@ -92,7 +92,7 @@ const app = new Elysia()
 			}),
 			query: t.Object({
 				key: t.String(),
-				purpose: t.String({ default: "_misc" }),
+				purpose: t.Optional(t.String({ default: "_misc" })),
 				thumbnail: t.Optional(
 					t.Number({
 						minimum: 1,

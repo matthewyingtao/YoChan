@@ -11,7 +11,7 @@ const app = new Elysia()
 		staticPlugin({
 			assets: config.UPLOADS_DIR,
 			prefix: "/uploads",
-			alwaysStatic: true,
+			staticLimit: 0,
 		})
 	)
 	.get("/files", () =>
@@ -76,9 +76,6 @@ const app = new Elysia()
 				String(purpose),
 				fileName
 			);
-
-			console.log(`upload folder is at ${config.UPLOADS_DIR}`);
-			console.log(`Saving file to ${outputPath}`);
 
 			mkdirSync(path.dirname(outputPath), { recursive: true });
 

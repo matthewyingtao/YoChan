@@ -15,7 +15,7 @@ const app = new Elysia()
 			return status(404, ErrorResponse("File not found."));
 		}
 
-		return file(filePath);
+		return imgFile;
 	})
 	.get("/", () => "Yo Chan is running and ready to gyu!")
 	.post(
@@ -130,12 +130,22 @@ const app = new Elysia()
 				return status(403, ErrorResponse("Forbidden. Invalid API key."));
 			}
 
-			const pathName = new URL(urlPath).pathname;
+			let pathName;
+			try {
+				pathName = new URL(urlPath).pathname;
+			} catch (error) {
+				return status(400, ErrorResponse("Invalid URL."));
+			}
+
 			const pathToDelete = pathName.replace(/^\/uploads/, "");
 
 			const filePath = path.join(config.UPLOADS_DIR, pathToDelete);
 
-			await Bun.file(filePath).delete();
+			try {
+				await Bun.file(filePath).delete();
+			} catch (error) {
+				return status(404, ErrorResponse("File not found."));
+			}
 
 			return status(200, SuccessResponse("File deleted successfully."));
 		},

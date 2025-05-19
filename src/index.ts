@@ -1,15 +1,17 @@
+import staticPlugin from "@elysiajs/static";
 import { Elysia, status, t } from "elysia";
+import path from "node:path";
 import sharp from "sharp";
 import { config } from "./config";
 import { ErrorResponse, getResultFormat, SuccessResponse } from "./lib";
 
 const app = new Elysia()
-	// .use(
-	// 	staticPlugin({
-	// 		assets: config.UPLOADS_DIR,
-	// 		prefix: "/uploads",
-	// 	})
-	// )
+	.use(
+		staticPlugin({
+			assets: config.UPLOADS_DIR,
+			prefix: "/uploads",
+		})
+	)
 	.post(
 		"/",
 		async ({
@@ -17,8 +19,6 @@ const app = new Elysia()
 			query: { asJpeg, asWebp, thumbnail, key: apiKey, purpose },
 			request,
 		}) => {
-			console.log(import.meta.path);
-
 			if (!apiKey) {
 				return status(
 					401,
@@ -108,36 +108,36 @@ const app = new Elysia()
 			}),
 		}
 	)
-	// .delete(
-	// 	"/",
-	// 	async ({ query: { key: apiKey, urlPath } }) => {
-	// 		if (!apiKey) {
-	// 			return status(
-	// 				401,
-	// 				ErrorResponse(
-	// 					"Unauthorized. Please provide your api key as a query parameter e.g. `?key=[]`."
-	// 				)
-	// 			);
-	// 		}
+	.delete(
+		"/",
+		async ({ query: { key: apiKey, urlPath } }) => {
+			if (!apiKey) {
+				return status(
+					401,
+					ErrorResponse(
+						"Unauthorized. Please provide your api key as a query parameter e.g. `?key=[]`."
+					)
+				);
+			}
 
-	// 		if (apiKey !== config.API_KEY) {
-	// 			return status(403, ErrorResponse("Forbidden. Invalid API key."));
-	// 		}
+			if (apiKey !== config.API_KEY) {
+				return status(403, ErrorResponse("Forbidden. Invalid API key."));
+			}
 
-	// 		const pathName = new URL(urlPath).pathname;
-	// 		const pathToDelete = pathName.replace(/^\/uploads/, "");
+			const pathName = new URL(urlPath).pathname;
+			const pathToDelete = pathName.replace(/^\/uploads/, "");
 
-	// 		const filePath = path.join(config.UPLOADS_DIR, pathToDelete);
+			const filePath = path.join(config.UPLOADS_DIR, pathToDelete);
 
-	// 		await Bun.file(filePath).delete();
+			await Bun.file(filePath).delete();
 
-	// 		return status(200, SuccessResponse("File deleted successfully."));
-	// 	},
-	// 	{
-	// 		query: t.Object({
-	// 			key: t.String(),
-	// 			urlPath: t.String(),
-	// 		}),
-	// 	}
-	// )
+			return status(200, SuccessResponse("File deleted successfully."));
+		},
+		{
+			query: t.Object({
+				key: t.String(),
+				urlPath: t.String(),
+			}),
+		}
+	)
 	.listen(config.PORT);

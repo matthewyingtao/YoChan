@@ -58,11 +58,7 @@ const app = new Elysia()
 			const uuid = crypto.randomUUID();
 			const fileName = `${uuid}.${await getResultFormat(img)}`;
 
-			const outputPath = path.join(
-				config.UPLOADS_DIR,
-				String(purpose),
-				fileName
-			);
+			const outputPath = path.join(config.UPLOADS_DIR, purpose, fileName);
 
 			mkdirSync(path.dirname(outputPath), { recursive: true });
 
@@ -81,7 +77,7 @@ const app = new Elysia()
 			}),
 			query: t.Object({
 				key: t.String(),
-				purpose: t.Optional(t.String({ default: "_misc" })),
+				purpose: t.String({ default: "_misc" }),
 				thumbnail: t.Optional(
 					t.Number({
 						minimum: 1,

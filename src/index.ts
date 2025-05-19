@@ -13,6 +13,7 @@ const app = new Elysia()
 			prefix: "/uploads",
 		})
 	)
+	.get("/", () => "Yo Chan is running and ready to gyu!")
 	.post(
 		"/",
 		async ({

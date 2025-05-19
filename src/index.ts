@@ -11,6 +11,7 @@ const app = new Elysia()
 		staticPlugin({
 			assets: config.UPLOADS_DIR,
 			prefix: "/uploads",
+			alwaysStatic: true,
 		})
 	)
 	.get("/files", () =>

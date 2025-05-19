@@ -1,4 +1,3 @@
-import staticPlugin from "@elysiajs/static";
 import { Elysia, status, t } from "elysia";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
@@ -7,12 +6,12 @@ import { config } from "./config";
 import { ErrorResponse, getResultFormat, SuccessResponse } from "./lib";
 
 const app = new Elysia()
-	.use(
-		staticPlugin({
-			assets: config.UPLOADS_DIR,
-			prefix: "/uploads",
-		})
-	)
+	// .use(
+	// 	staticPlugin({
+	// 		assets: config.UPLOADS_DIR,
+	// 		prefix: "/uploads",
+	// 	})
+	// )
 	.post(
 		"/",
 		async ({
@@ -20,7 +19,7 @@ const app = new Elysia()
 			query: { asJpeg, asWebp, thumbnail, key: apiKey, purpose },
 			request,
 		}) => {
-			console.log(import.meta);
+			console.log(import.meta.path);
 
 			if (!apiKey) {
 				return status(

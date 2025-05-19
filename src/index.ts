@@ -6,17 +6,6 @@ import { config } from "./config";
 import { ErrorResponse, getResultFormat, SuccessResponse } from "./lib";
 
 const app = new Elysia()
-	.get("/uploads/*", async ({ params: { "*": url } }) => {
-		const filePath = path.join(config.UPLOADS_DIR, url);
-
-		const imgFile = Bun.file(filePath);
-
-		if (!imgFile.exists()) {
-			return status(404, ErrorResponse("File not found."));
-		}
-
-		return imgFile;
-	})
 	.get("/", () => "Yo Chan is running and ready to gyu!")
 	.post(
 		"/",
@@ -156,6 +145,17 @@ const app = new Elysia()
 			}),
 		}
 	)
+	.get("/uploads/*", async ({ params: { "*": url } }) => {
+		const filePath = path.join(config.UPLOADS_DIR, url);
+
+		const imgFile = Bun.file(filePath);
+
+		if (!imgFile.exists()) {
+			return status(404, ErrorResponse("File not found."));
+		}
+
+		return imgFile;
+	})
 	.listen(config.PORT, (server) => {
-		console.log(`Server is running on port ${server.port}!`);
+		console.log(`Yo Chan is running on port ${server.port} and ready to gyu!`);
 	});

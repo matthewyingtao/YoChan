@@ -156,6 +156,6 @@ const app = new Elysia()
 			}),
 		}
 	)
-	.listen(config.PORT);
-
-console.log(`Server is running on port ${config.PORT}!`);
+	.listen(config.PORT, (server) => {
+		console.log(`Server is running on port ${server.port}!`);
+	});

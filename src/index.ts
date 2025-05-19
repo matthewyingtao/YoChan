@@ -15,7 +15,7 @@ const app = new Elysia()
 			return status(404, ErrorResponse("File not found."));
 		}
 
-		return imgFile;
+		return file(filePath);
 	})
 	.get("/", () => "Yo Chan is running and ready to gyu!")
 	.post(

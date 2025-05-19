@@ -18,7 +18,7 @@ type ErrorResponse = {
 
 type SuccessResponse = {
 	success: true;
-	imageUrl: string;
+	result: string;
 };
 
 export function ErrorResponse(message: string): ErrorResponse {
@@ -30,9 +30,9 @@ export function ErrorResponse(message: string): ErrorResponse {
 	};
 }
 
-export function SuccessResponse(imageUrl: string): SuccessResponse {
+export function SuccessResponse(result: string): SuccessResponse {
 	return {
 		success: true,
-		imageUrl,
+		result,
 	};
 }

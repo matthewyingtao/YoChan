@@ -9,9 +9,9 @@
 		"RUN bun install --frozen-lockfile --production",
 		"COPY ./src ./src",
 		"ENV NODE_ENV=production",
-		"RUN bun build --compile --minify-whitespace --minify-syntax --target bun --outfile dist/server ./src/index.ts",
+		"RUN bun build --minify --target bun --outfile ./dist/index.js ./src/index.ts",
 		"RUN mkdir -p uploads",
 		"EXPOSE 3000",
-		"CMD [\"./dist/server\"]"
+		"CMD [\"./dist/index.js\"]"
 	]
 }

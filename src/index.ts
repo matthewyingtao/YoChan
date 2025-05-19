@@ -1,6 +1,6 @@
 import staticPlugin from "@elysiajs/static";
 import { Elysia, status, t } from "elysia";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readdirSync } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
 import { config } from "./config";
@@ -11,6 +11,11 @@ const app = new Elysia()
 		staticPlugin({
 			assets: config.UPLOADS_DIR,
 			prefix: "/uploads",
+		})
+	)
+	.get("/files", () =>
+		readdirSync(config.UPLOADS_DIR, {
+			recursive: true,
 		})
 	)
 	.get("/", () => "Yo Chan is running and ready to gyu!")

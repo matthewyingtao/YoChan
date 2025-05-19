@@ -6,6 +6,8 @@ import sharp from "sharp";
 import { config } from "./config";
 import { ErrorResponse, getResultFormat, SuccessResponse } from "./lib";
 
+console.log(import.meta);
+
 const app = new Elysia()
 	.use(
 		staticPlugin({

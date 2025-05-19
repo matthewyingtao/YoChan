@@ -1,5 +1,6 @@
 import staticPlugin from "@elysiajs/static";
 import { Elysia, status, t } from "elysia";
+import { mkdirSync } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
 import { config } from "./config";
@@ -63,15 +64,15 @@ const app = new Elysia()
 			const uuid = crypto.randomUUID();
 			const fileName = `${uuid}.${await getResultFormat(img)}`;
 
-			// const outputPath = path.join(
-			// 	config.UPLOADS_DIR,
-			// 	String(purpose),
-			// 	fileName
-			// );
+			const outputPath = path.join(
+				config.UPLOADS_DIR,
+				String(purpose),
+				fileName
+			);
 
-			// mkdirSync(path.dirname(outputPath), { recursive: true });
+			mkdirSync(path.dirname(outputPath), { recursive: true });
 
-			// await img.toFile(outputPath);
+			await img.toFile(outputPath);
 
 			return status(
 				200,

@@ -6,8 +6,6 @@ import sharp from "sharp";
 import { config } from "./config";
 import { ErrorResponse, getResultFormat, SuccessResponse } from "./lib";
 
-console.log(import.meta);
-
 const app = new Elysia()
 	.use(
 		staticPlugin({
@@ -22,6 +20,8 @@ const app = new Elysia()
 			query: { asJpeg, asWebp, thumbnail, key: apiKey, purpose },
 			request,
 		}) => {
+			console.log(import.meta);
+
 			if (!apiKey) {
 				return status(
 					401,

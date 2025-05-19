@@ -19,6 +19,8 @@ Originally, I wrote this when I bought a very cheap VPS to play with, and wanted
 
 ## API
 
+For more detail look at the type definitions of the API routes themselves in the source code. It's relatively easy to read I promise!
+
 | Route        | Method   | Use                         | Expects                                                             |
 | ------------ | -------- | --------------------------- | ------------------------------------------------------------------- |
 | `/`          | `GET`    | Check the server is running |                                                                     |

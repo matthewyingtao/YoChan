@@ -73,7 +73,13 @@ const app = new Elysia()
 		},
 		{
 			body: t.Object({
-				file: t.File({ type: "image/*" }),
+				file: t.File({
+					type: "image/*",
+					maxSize: "10m",
+					error: ErrorResponse(
+						"`file` must be an image, with a maximum size of 10 MB."
+					),
+				}),
 			}),
 			query: t.Object({
 				purpose: t.String({
@@ -207,7 +213,13 @@ const app = new Elysia()
 		},
 		{
 			body: t.Object({
-				files: t.Files({ format: "image/*" }),
+				files: t.Files({
+					format: "image/*",
+					maxSize: "10m",
+					error: ErrorResponse(
+						"`file` must be an image, with a maximum size of 10 MB."
+					),
+				}),
 			}),
 			query: t.Object({
 				purpose: t.String({

@@ -27,4 +27,6 @@ For more detail look at the type definitions of the API routes themselves in the
 | `/`          | `POST`   | Create image                | `body: { file: File }, query: { key, purpose?, ...transformations}`    |
 | `/`          | `DELETE` | Delete image                | `query: { key, urlPath }`                                              |
 | `/multiple`  | `POST`   | Create multiple images      | `body: { files: File[] }, query: { key, purpose?, ...transformations}` |
+| `/multiple`  | `DELETE` | Delete all images in folder | `query: { key, purpose }`                                              |
 | `/uploads/*` | `GET`    | Get image stored at `/*`    | e.g. `/uploads/food/test.jpeg`                                         |
+| `/list`      | `GET`    | List all folders & images   | `query: { key }`                                                       |

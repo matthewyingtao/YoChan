@@ -155,8 +155,6 @@ const app = new Elysia()
 					SuccessResponse(`Directory ${purpose} deleted successfully.`)
 				);
 			} catch (error) {
-				console.log(error);
-
 				return status(404, ErrorResponse("Directory not found."));
 			}
 		},

@@ -22,7 +22,7 @@ const app = new Elysia()
 			},
 		})
 	)
-	.get("/", () => "Yo Chan is running and ready to gyu!")
+	.get("/", () => Bun.file(path.join(import.meta.dir, "index.html")))
 	.get("/uploads/*", async ({ params: { "*": url } }) => {
 		const filePath = path.join(config.UPLOADS_DIR, url);
 
@@ -283,7 +283,5 @@ const app = new Elysia()
 		return status(200, SuccessResponse(folders));
 	})
 	.listen(config.PORT, (server) => {
-		console.log(
-			`👋🦭  Yo Chan is running on port ${server.port} and ready to gyu!`
-		);
+		console.log(`👋🦭  Yo Chan is running at ${server.url} and ready to gyu!`);
 	});

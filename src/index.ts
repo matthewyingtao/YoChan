@@ -1,5 +1,5 @@
 import { Elysia, status, t } from "elysia";
-import { mkdirSync, rmSync } from "node:fs";
+import { mkdirSync, readdirSync, rmSync } from "node:fs";
 import path from "node:path";
 import { config } from "./config";
 import {
@@ -238,6 +238,23 @@ const app = new Elysia()
 			}),
 		}
 	)
+	.get("/list", async ({ request }) => {
+		const purposeFolders = readdirSync(config.UPLOADS_DIR);
+		const folders = purposeFolders.map((f) => {
+			const folder = readdirSync(path.join(config.UPLOADS_DIR, f));
+
+			return {
+				purpose: f,
+				length: folder.length,
+				files: folder.map((file) => ({
+					name: file,
+					url: new URL(`/uploads/${f}/${file}`, request.url).toString(),
+				})),
+			};
+		});
+
+		return status(200, SuccessResponse(folders));
+	})
 	.listen(config.PORT, (server) => {
 		console.log(`Yo Chan is running on port ${server.port} and ready to gyu!`);
 	});

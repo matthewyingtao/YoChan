@@ -12,6 +12,30 @@ import {
 
 const app = new Elysia()
 	.get("/", () => "Yo Chan is running and ready to gyu!")
+	.get("/uploads/*", async ({ params: { "*": url } }) => {
+		const filePath = path.join(config.UPLOADS_DIR, url);
+
+		const imgFile = Bun.file(filePath);
+
+		if (!imgFile.exists()) {
+			return status(404, ErrorResponse("File not found."));
+		}
+
+		return imgFile;
+	})
+	.guard({
+		schema: "standalone",
+		query: t.Object({
+			key: t.String({
+				error: ErrorResponse(
+					"Unauthorized. Please provide your api key as a query parameter e.g. `?key=[]`."
+				),
+			}),
+		}),
+	})
+	.guard({
+		beforeHandle: ({ query: { key } }) => authUser(key),
+	})
 	.post(
 		"/",
 		async ({
@@ -19,8 +43,6 @@ const app = new Elysia()
 			query: { asJpeg, asWebp, thumbnail, purpose },
 			request,
 		}) => {
-			console.log("File: ", file);
-
 			if (!file) {
 				return status(400, ErrorResponse("No file uploaded."));
 			}
@@ -66,16 +88,10 @@ const app = new Elysia()
 			);
 		},
 		{
-			beforeHandle: ({ query: { key } }) => authUser(key),
 			body: t.Object({
 				file: t.File({ type: "image/*" }),
 			}),
 			query: t.Object({
-				key: t.String({
-					error: ErrorResponse(
-						"Unauthorized. Please provide your api key as a query parameter e.g. `?key=[]`."
-					),
-				}),
 				purpose: t.String({ default: "_misc" }),
 				thumbnail: t.Optional(
 					t.Number({
@@ -100,7 +116,7 @@ const app = new Elysia()
 	)
 	.delete(
 		"/",
-		async ({ query: { key: apiKey, urlPath } }) => {
+		async ({ query: { urlPath } }) => {
 			let pathName;
 			try {
 				pathName = new URL(urlPath).pathname;
@@ -121,9 +137,7 @@ const app = new Elysia()
 			return status(200, SuccessResponse("File deleted successfully."));
 		},
 		{
-			beforeHandle: ({ query: { key } }) => authUser(key),
 			query: t.Object({
-				key: t.String(),
 				urlPath: t.String(),
 			}),
 		}
@@ -132,7 +146,7 @@ const app = new Elysia()
 		"/multiple",
 		async ({
 			body: { files },
-			query: { asJpeg, asWebp, thumbnail, key: apiKey, purpose },
+			query: { asJpeg, asWebp, thumbnail, purpose },
 			request,
 		}) => {
 			if (files.length < 1) {
@@ -182,12 +196,10 @@ const app = new Elysia()
 			return status(200, SuccessResponse(outputRes));
 		},
 		{
-			beforeHandle: ({ query: { key } }) => authUser(key),
 			body: t.Object({
 				files: t.Files({ format: "image/*" }),
 			}),
 			query: t.Object({
-				key: t.String(),
 				purpose: t.String({ default: "_misc" }),
 				thumbnail: t.Optional(
 					t.Number({
@@ -210,17 +222,6 @@ const app = new Elysia()
 			}),
 		}
 	)
-	.get("/uploads/*", async ({ params: { "*": url } }) => {
-		const filePath = path.join(config.UPLOADS_DIR, url);
-
-		const imgFile = Bun.file(filePath);
-
-		if (!imgFile.exists()) {
-			return status(404, ErrorResponse("File not found."));
-		}
-
-		return imgFile;
-	})
 	.listen(config.PORT, (server) => {
 		console.log(`Yo Chan is running on port ${server.port} and ready to gyu!`);
 	});

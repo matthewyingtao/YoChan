@@ -1,4 +1,5 @@
 import { Elysia, status, t } from "elysia";
+import logixlysia from "logixlysia";
 import { mkdirSync, readdirSync, rmSync } from "node:fs";
 import path from "node:path";
 import { config } from "./config";
@@ -9,8 +10,18 @@ import {
 	getResultFormat,
 	SuccessResponse,
 } from "./lib";
-
 const app = new Elysia()
+	.use(
+		logixlysia({
+			config: {
+				showStartupMessage: false,
+				timestamp: {
+					translateTime: "dd/mm/yy @HH:MM",
+				},
+				customLogFormat: "{level}{now} {method}{pathname}{duration}",
+			},
+		})
+	)
 	.get("/", () => "Yo Chan is running and ready to gyu!")
 	.get("/uploads/*", async ({ params: { "*": url } }) => {
 		const filePath = path.join(config.UPLOADS_DIR, url);
@@ -272,5 +283,7 @@ const app = new Elysia()
 		return status(200, SuccessResponse(folders));
 	})
 	.listen(config.PORT, (server) => {
-		console.log(`Yo Chan is running on port ${server.port} and ready to gyu!`);
+		console.log(
+			`👋🦭  Yo Chan is running on port ${server.port} and ready to gyu!`
+		);
 	});

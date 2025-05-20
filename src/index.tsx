@@ -311,12 +311,10 @@ const app = new Elysia()
 
 		return status(200, SuccessResponse(folders));
 	})
-	.listen(
-		{
-			port: config.PORT,
-			hostname: config.HOST || "localhost",
-		},
-		({ url }) => {
-			console.log(`👋🦭  Yo Chan is running at ${url} and ready to gyu!`);
-		}
-	);
+	.listen(config.PORT, ({ development, port }) => {
+		console.log(
+			development
+				? `👋🦭  Yo Chan is running at http://localhost:${port} and ready to gyu!`
+				: `👋🦭  Yo Chan is running and ready to gyu!`
+		);
+	});

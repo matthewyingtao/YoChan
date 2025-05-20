@@ -141,6 +141,100 @@ const app = new Elysia()
 			}),
 		}
 	)
+	.post(
+		"/multiple",
+		async ({
+			body: { files },
+			query: { asJpeg, asWebp, thumbnail, key: apiKey, purpose },
+			request,
+		}) => {
+			if (!apiKey) {
+				return status(
+					401,
+					ErrorResponse(
+						"Unauthorized. Please provide your api key as a query parameter e.g. `?key=[]`."
+					)
+				);
+			}
+
+			if (apiKey !== config.API_KEY) {
+				return status(403, ErrorResponse("Forbidden. Invalid API key."));
+			}
+
+			if (files.length < 1) {
+				return status(400, ErrorResponse("No file uploaded."));
+			}
+
+			let outputRes = [];
+
+			for (const file of files) {
+				let img = sharp(await file.arrayBuffer()).autoOrient();
+
+				// apply transformations
+				for (const [key, value] of Object.entries({
+					asJpeg,
+					asWebp,
+					thumbnail,
+				})) {
+					if (!value) continue;
+
+					switch (key) {
+						case "asJpeg":
+							img = img.jpeg({ quality: value });
+							break;
+						case "asWebp":
+							img = img.webp({ quality: value });
+							break;
+						case "thumbnail":
+							img = img.resize(value, value, { fit: "inside" });
+							break;
+					}
+				}
+
+				// generate a random file name and save the file
+				const uuid = crypto.randomUUID();
+				const fileName = `${uuid}.${await getResultFormat(img)}`;
+
+				const outputPath = path.join(config.UPLOADS_DIR, purpose, fileName);
+
+				mkdirSync(path.dirname(outputPath), { recursive: true });
+
+				await img.toFile(outputPath);
+
+				outputRes.push(
+					new URL(`/uploads/${purpose}/${fileName}`, request.url).toString()
+				);
+			}
+			return status(200, SuccessResponse(outputRes));
+		},
+		{
+			body: t.Object({
+				files: t.Files({ format: "image/*" }),
+			}),
+			query: t.Object({
+				key: t.String(),
+				purpose: t.String({ default: "_misc" }),
+				thumbnail: t.Optional(
+					t.Number({
+						minimum: 1,
+						maximum: 10000,
+					})
+				),
+				asJpeg: t.Optional(
+					t.Number({
+						minimum: 1,
+						maximum: 100,
+					})
+				),
+				asWebp: t.Optional(
+					t.Number({
+						minimum: 1,
+						maximum: 100,
+					})
+				),
+			}),
+		}
+	)
 	.get("/uploads/*", async ({ params: { "*": url } }) => {
 		const filePath = path.join(config.UPLOADS_DIR, url);
 

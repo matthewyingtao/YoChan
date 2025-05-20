@@ -1,5 +1,5 @@
 import { Elysia, status, t } from "elysia";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, rmSync } from "node:fs";
 import path from "node:path";
 import { config } from "./config";
 import {
@@ -29,7 +29,7 @@ const app = new Elysia()
 		query: t.Object({
 			key: t.String({
 				error: ErrorResponse(
-					"Unauthorized. Please provide your api key as a query parameter e.g. `?key=[]`."
+					"Unauthorized. Please provide your api `key` as a query parameter e.g. `?key=[]`."
 				),
 			}),
 		}),
@@ -76,7 +76,13 @@ const app = new Elysia()
 				file: t.File({ type: "image/*" }),
 			}),
 			query: t.Object({
-				purpose: t.String({ default: "_misc" }),
+				purpose: t.String({
+					default: "_misc",
+					pattern: "^[a-zA-Z0-9_-]+$",
+					error: ErrorResponse(
+						"Invalid `purpose` query parameter. At least 1 character, only alphanumeric, underscores and hyphen."
+					),
+				}),
 				thumbnail: t.Optional(
 					t.Number({
 						minimum: 1,
@@ -126,6 +132,45 @@ const app = new Elysia()
 			}),
 		}
 	)
+	.delete(
+		"/multiple",
+		async ({ query: { purpose } }) => {
+			// check if the directory exists
+			const dirPath = path.join(config.UPLOADS_DIR, purpose);
+
+			try {
+				const dir = Bun.file(dirPath);
+
+				// check that the destination is a directory
+				if (!(await dir.stat()).isDirectory()) {
+					return status(404, ErrorResponse("Directory not found."));
+				}
+
+				rmSync(dirPath, {
+					recursive: true,
+				});
+
+				return status(
+					200,
+					SuccessResponse(`Directory ${purpose} deleted successfully.`)
+				);
+			} catch (error) {
+				console.log(error);
+
+				return status(404, ErrorResponse("Directory not found."));
+			}
+		},
+		{
+			query: t.Object({
+				purpose: t.String({
+					pattern: "^[a-zA-Z0-9_-]+$",
+					error: ErrorResponse(
+						"Invalid `purpose` query parameter. At least 1 character, only alphanumeric, underscores and hyphen."
+					),
+				}),
+			}),
+		}
+	)
 	.post(
 		"/multiple",
 		async ({
@@ -167,7 +212,13 @@ const app = new Elysia()
 				files: t.Files({ format: "image/*" }),
 			}),
 			query: t.Object({
-				purpose: t.String({ default: "_misc" }),
+				purpose: t.String({
+					default: "_misc",
+					pattern: "^[a-zA-Z0-9_-]+$",
+					error: ErrorResponse(
+						"Invalid `purpose` query parameter. At least 1 character, only alphanumeric, underscores and hyphen."
+					),
+				}),
 				thumbnail: t.Optional(
 					t.Number({
 						minimum: 1,

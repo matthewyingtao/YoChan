@@ -252,16 +252,15 @@ const app = new Elysia()
 	)
 	.get("/list", async ({ request }) => {
 		const purposeFolders = readdirSync(config.UPLOADS_DIR);
-		const folders = purposeFolders.map((f) => {
-			const folder = readdirSync(path.join(config.UPLOADS_DIR, f));
+		const folders = purposeFolders.map((folderName) => {
+			const folder = readdirSync(path.join(config.UPLOADS_DIR, folderName));
 
 			return {
-				purpose: f,
+				purpose: folderName,
 				length: folder.length,
-				files: folder.map((file) => ({
-					name: file,
-					url: new URL(`/uploads/${f}/${file}`, request.url).toString(),
-				})),
+				files: folder.map((fileName) =>
+					new URL(`/uploads/${folderName}/${fileName}`, request.url).toString()
+				),
 			};
 		});
 

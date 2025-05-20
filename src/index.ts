@@ -115,11 +115,13 @@ const app = new Elysia()
 		async ({ query: { urlPath } }) => {
 			let pathName;
 			try {
+				// Parse the URL to extract the pathname (e.g., /uploads/purpose/filename)
 				pathName = new URL(urlPath).pathname;
 			} catch (error) {
 				return status(400, ErrorResponse("Invalid URL."));
 			}
 
+			// Remove the '/uploads' prefix to get the file path in the project
 			const pathToDelete = pathName.replace(/^\/uploads/, "");
 
 			const filePath = path.join(config.UPLOADS_DIR, pathToDelete);
@@ -152,6 +154,7 @@ const app = new Elysia()
 					return status(404, ErrorResponse("Directory not found."));
 				}
 
+				// syncronously deletes the folder & files inside
 				rmSync(dirPath, {
 					recursive: true,
 				});
@@ -161,6 +164,7 @@ const app = new Elysia()
 					SuccessResponse(`Directory ${purpose} deleted successfully.`)
 				);
 			} catch (error) {
+				// no file/directory found at the path
 				return status(404, ErrorResponse("Directory not found."));
 			}
 		},
@@ -251,8 +255,9 @@ const app = new Elysia()
 		}
 	)
 	.get("/list", async ({ request }) => {
-		const purposeFolders = readdirSync(config.UPLOADS_DIR);
-		const folders = purposeFolders.map((folderName) => {
+		// Reads all folders in the uploads directory (each folder is a "purpose")
+		const folders = readdirSync(config.UPLOADS_DIR).map((folderName) => {
+			// Reads all files in each purpose folder
 			const folder = readdirSync(path.join(config.UPLOADS_DIR, folderName));
 
 			return {

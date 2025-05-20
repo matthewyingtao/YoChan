@@ -21,9 +21,10 @@ Originally, I wrote this when I bought a very cheap VPS to play with, and wanted
 
 For more detail look at the type definitions of the API routes themselves in the source code. It's relatively easy to read I promise!
 
-| Route        | Method   | Use                         | Expects                                                             |
-| ------------ | -------- | --------------------------- | ------------------------------------------------------------------- |
-| `/`          | `GET`    | Check the server is running |                                                                     |
-| `/`          | `POST`   | Create image                | `body: { file: File }, query: { key, purpose?, ...transformations}` |
-| `/`          | `DELETE` | Delete image                | `query: { key, urlPath }`                                           |
-| `/uploads/*` | `GET`    | Get image stored at `/*`    | e.g. `/uploads/food/test.jpeg`                                      |
+| Route        | Method   | Use                         | Expects                                                                |
+| ------------ | -------- | --------------------------- | ---------------------------------------------------------------------- |
+| `/`          | `GET`    | Check the server is running |                                                                        |
+| `/`          | `POST`   | Create image                | `body: { file: File }, query: { key, purpose?, ...transformations}`    |
+| `/`          | `DELETE` | Delete image                | `query: { key, urlPath }`                                              |
+| `/multiple`  | `POST`   | Create multiple images      | `body: { files: File[] }, query: { key, purpose?, ...transformations}` |
+| `/uploads/*` | `GET`    | Get image stored at `/*`    | e.g. `/uploads/food/test.jpeg`                                         |

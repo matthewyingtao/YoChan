@@ -3,7 +3,12 @@ import { mkdirSync } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
 import { config } from "./config";
-import { ErrorResponse, getResultFormat, SuccessResponse } from "./lib";
+import {
+	authUser,
+	ErrorResponse,
+	getResultFormat,
+	SuccessResponse,
+} from "./lib";
 
 const app = new Elysia()
 	.get("/", () => "Yo Chan is running and ready to gyu!")
@@ -11,21 +16,10 @@ const app = new Elysia()
 		"/",
 		async ({
 			body: { file },
-			query: { asJpeg, asWebp, thumbnail, key: apiKey, purpose },
+			query: { asJpeg, asWebp, thumbnail, purpose },
 			request,
 		}) => {
-			if (!apiKey) {
-				return status(
-					401,
-					ErrorResponse(
-						"Unauthorized. Please provide your api key as a query parameter e.g. `?key=[]`."
-					)
-				);
-			}
-
-			if (apiKey !== config.API_KEY) {
-				return status(403, ErrorResponse("Forbidden. Invalid API key."));
-			}
+			console.log("File: ", file);
 
 			if (!file) {
 				return status(400, ErrorResponse("No file uploaded."));
@@ -72,11 +66,16 @@ const app = new Elysia()
 			);
 		},
 		{
+			beforeHandle: ({ query: { key } }) => authUser(key),
 			body: t.Object({
-				file: t.File({ format: "image/*" }),
+				file: t.File({ type: "image/*" }),
 			}),
 			query: t.Object({
-				key: t.String(),
+				key: t.String({
+					error: ErrorResponse(
+						"Unauthorized. Please provide your api key as a query parameter e.g. `?key=[]`."
+					),
+				}),
 				purpose: t.String({ default: "_misc" }),
 				thumbnail: t.Optional(
 					t.Number({
@@ -102,19 +101,6 @@ const app = new Elysia()
 	.delete(
 		"/",
 		async ({ query: { key: apiKey, urlPath } }) => {
-			if (!apiKey) {
-				return status(
-					401,
-					ErrorResponse(
-						"Unauthorized. Please provide your api key as a query parameter e.g. `?key=[]`."
-					)
-				);
-			}
-
-			if (apiKey !== config.API_KEY) {
-				return status(403, ErrorResponse("Forbidden. Invalid API key."));
-			}
-
 			let pathName;
 			try {
 				pathName = new URL(urlPath).pathname;
@@ -135,6 +121,7 @@ const app = new Elysia()
 			return status(200, SuccessResponse("File deleted successfully."));
 		},
 		{
+			beforeHandle: ({ query: { key } }) => authUser(key),
 			query: t.Object({
 				key: t.String(),
 				urlPath: t.String(),
@@ -148,19 +135,6 @@ const app = new Elysia()
 			query: { asJpeg, asWebp, thumbnail, key: apiKey, purpose },
 			request,
 		}) => {
-			if (!apiKey) {
-				return status(
-					401,
-					ErrorResponse(
-						"Unauthorized. Please provide your api key as a query parameter e.g. `?key=[]`."
-					)
-				);
-			}
-
-			if (apiKey !== config.API_KEY) {
-				return status(403, ErrorResponse("Forbidden. Invalid API key."));
-			}
-
 			if (files.length < 1) {
 				return status(400, ErrorResponse("No file uploaded."));
 			}
@@ -208,6 +182,7 @@ const app = new Elysia()
 			return status(200, SuccessResponse(outputRes));
 		},
 		{
+			beforeHandle: ({ query: { key } }) => authUser(key),
 			body: t.Object({
 				files: t.Files({ format: "image/*" }),
 			}),

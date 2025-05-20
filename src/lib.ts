@@ -43,3 +43,26 @@ export function SuccessResponse(result: any): SuccessResponse {
 		result,
 	};
 }
+
+export async function applyImageTransforms(
+	file: File,
+	options: { asJpeg?: number; asWebp?: number; thumbnail?: number }
+) {
+	let img = sharp(await file.arrayBuffer()).autoOrient();
+
+	for (const [key, value] of Object.entries(options)) {
+		if (!value) continue;
+		switch (key) {
+			case "asJpeg":
+				img = img.jpeg({ quality: value });
+				break;
+			case "asWebp":
+				img = img.webp({ quality: value });
+				break;
+			case "thumbnail":
+				img = img.resize(value, value, { fit: "inside" });
+				break;
+		}
+	}
+	return img;
+}

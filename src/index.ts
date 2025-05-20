@@ -1,9 +1,9 @@
 import { Elysia, status, t } from "elysia";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
-import sharp from "sharp";
 import { config } from "./config";
 import {
+	applyImageTransforms,
 	authUser,
 	ErrorResponse,
 	getResultFormat,
@@ -23,6 +23,7 @@ const app = new Elysia()
 
 		return imgFile;
 	})
+	// all routes below this require authentication
 	.guard({
 		schema: "standalone",
 		query: t.Object({
@@ -47,28 +48,11 @@ const app = new Elysia()
 				return status(400, ErrorResponse("No file uploaded."));
 			}
 
-			let img = sharp(await file.arrayBuffer());
-
-			// apply transformations
-			for (const [key, value] of Object.entries({
+			const img = await applyImageTransforms(file, {
 				asJpeg,
 				asWebp,
 				thumbnail,
-			})) {
-				if (!value) continue;
-
-				switch (key) {
-					case "asJpeg":
-						img = img.jpeg({ quality: value });
-						break;
-					case "asWebp":
-						img = img.webp({ quality: value });
-						break;
-					case "thumbnail":
-						img = img.resize(value, value, { fit: "inside" });
-						break;
-				}
-			}
+			});
 
 			// generate a random file name and save the file
 			const uuid = crypto.randomUUID();
@@ -156,28 +140,11 @@ const app = new Elysia()
 			let outputRes = [];
 
 			for (const file of files) {
-				let img = sharp(await file.arrayBuffer()).autoOrient();
-
-				// apply transformations
-				for (const [key, value] of Object.entries({
+				const img = await applyImageTransforms(file, {
 					asJpeg,
 					asWebp,
 					thumbnail,
-				})) {
-					if (!value) continue;
-
-					switch (key) {
-						case "asJpeg":
-							img = img.jpeg({ quality: value });
-							break;
-						case "asWebp":
-							img = img.webp({ quality: value });
-							break;
-						case "thumbnail":
-							img = img.resize(value, value, { fit: "inside" });
-							break;
-					}
-				}
+				});
 
 				// generate a random file name and save the file
 				const uuid = crypto.randomUUID();

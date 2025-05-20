@@ -17,7 +17,7 @@ const app = new Elysia()
 
 		const imgFile = Bun.file(filePath);
 
-		if (!imgFile.exists()) {
+		if (!(await imgFile.exists())) {
 			return status(404, ErrorResponse("File not found."));
 		}
 

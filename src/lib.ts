@@ -11,11 +11,10 @@ export async function getResultFormat(img: Sharp) {
 	return metadata.format;
 }
 
-export function authUser(apiKey: string) {
-	if (apiKey !== config.API_KEY) {
-		return status(403, ErrorResponse("Forbidden. Invalid API key."));
-	}
-}
+export const authUser = (apiKey: string) =>
+	apiKey !== config.API_KEY
+		? status(403, ErrorResponse("Forbidden. Invalid API key."))
+		: undefined;
 
 type ErrorResponse = {
 	success: false;

@@ -4,6 +4,7 @@ export const config = {
 	PORT: process.env.PORT || 3000,
 	API_KEY: process.env.API_KEY,
 	UPLOADS_DIR: path.join(import.meta.dirname, "..", "uploads"),
+	HOST: process.env.HOST || "",
 };
 
 if (!config.API_KEY) {

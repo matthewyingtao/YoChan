@@ -1,5 +1,7 @@
+import { status } from "elysia";
 import type { Sharp } from "sharp";
 import sharp from "sharp";
+import { config } from "./config";
 
 // Ideally we would use img.metadata() to get the format,
 // but it doesn't take into account the transformations.
@@ -7,6 +9,12 @@ export async function getResultFormat(img: Sharp) {
 	const outputBuffer = await img.toBuffer();
 	const metadata = await sharp(outputBuffer).metadata();
 	return metadata.format;
+}
+
+export function authUser(apiKey: string) {
+	if (apiKey !== config.API_KEY) {
+		return status(403, ErrorResponse("Forbidden. Invalid API key."));
+	}
 }
 
 type ErrorResponse = {

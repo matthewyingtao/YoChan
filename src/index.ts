@@ -15,10 +15,7 @@ const app = new Elysia()
 		logixlysia({
 			config: {
 				showStartupMessage: false,
-				timestamp: {
-					translateTime: "dd/mm/yy @HH:MM",
-				},
-				customLogFormat: "{level}{now} {method}{pathname}{duration}",
+				customLogFormat: "{level} {method}{pathname}{duration}",
 			},
 		})
 	)

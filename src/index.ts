@@ -26,7 +26,7 @@ const app = new Elysia()
 		const imgFile = Bun.file(filePath);
 
 		if (!(await imgFile.exists())) {
-			return status(404, ErrorResponse("File not found."));
+			throw status(404, ErrorResponse("File not found."));
 		}
 
 		return imgFile;
@@ -53,7 +53,7 @@ const app = new Elysia()
 			request,
 		}) => {
 			if (!file) {
-				return status(400, ErrorResponse("No file uploaded."));
+				throw status(400, ErrorResponse("No file uploaded."));
 			}
 
 			const img = await applyImageTransforms(file, {
@@ -126,7 +126,7 @@ const app = new Elysia()
 				// Parse the URL to extract the pathname (e.g., /uploads/purpose/filename)
 				pathName = new URL(urlPath).pathname;
 			} catch (error) {
-				return status(400, ErrorResponse("Invalid URL."));
+				throw status(400, ErrorResponse("Invalid URL."));
 			}
 
 			// Remove the '/uploads' prefix to get the file path in the project
@@ -137,7 +137,7 @@ const app = new Elysia()
 			try {
 				await Bun.file(filePath).delete();
 			} catch (error) {
-				return status(404, ErrorResponse("File not found."));
+				throw status(404, ErrorResponse("File not found."));
 			}
 
 			return status(200, SuccessResponse("File deleted successfully."));
@@ -159,7 +159,7 @@ const app = new Elysia()
 
 				// check that the destination is a directory
 				if (!(await dir.stat()).isDirectory()) {
-					return status(404, ErrorResponse("Directory not found."));
+					throw status(404, ErrorResponse("Directory not found."));
 				}
 
 				// syncronously deletes the folder & files inside
@@ -173,7 +173,7 @@ const app = new Elysia()
 				);
 			} catch (error) {
 				// no file/directory found at the path
-				return status(404, ErrorResponse("Directory not found."));
+				throw status(404, ErrorResponse("Directory not found."));
 			}
 		},
 		{
@@ -195,7 +195,7 @@ const app = new Elysia()
 			request,
 		}) => {
 			if (files.length < 1) {
-				return status(400, ErrorResponse("No file uploaded."));
+				throw status(400, ErrorResponse("No file uploaded."));
 			}
 
 			let outputRes = [];
@@ -226,7 +226,7 @@ const app = new Elysia()
 		{
 			body: t.Object({
 				files: t.Files({
-					format: "image/*",
+					type: "image/*",
 					maxSize: "10m",
 					error: ErrorResponse(
 						"`file` must be an image, with a maximum size of 10 MB."

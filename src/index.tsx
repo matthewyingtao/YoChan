@@ -1,4 +1,3 @@
-import { html, Html } from "@elysiajs/html";
 import { Elysia, status, t } from "elysia";
 import logixlysia from "logixlysia";
 import { mkdirSync, readdirSync, rmSync } from "node:fs";
@@ -12,7 +11,6 @@ import {
 	SuccessResponse,
 } from "./lib";
 const app = new Elysia()
-	.use(html())
 	.use(
 		logixlysia({
 			config: {
@@ -21,32 +19,35 @@ const app = new Elysia()
 			},
 		})
 	)
-	.get("/", () => (
-		<html lang="en">
-			<head>
-				<meta charset="UTF-8" />
-				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-				<title>Yo Chan</title>
-				<style>
-					{`html,
-					body {
-						height: 100%;
-						margin: 0;
-						display: grid;
-						place-items: center;
-						background-color: hsl(233, 20%, 92%);
-						font-family: 'Courier New', Courier, monospace;
-						text-align: center;
-						text-wrap: balance;
-						color: hsl(233, 80%, 40%);
-					}`}
-				</style>
-			</head>
-			<body>
-				<h1>👋🦭 Yo Chan is running and ready to gyu!</h1>
-			</body>
-		</html>
-	))
+	.get("/", ({ set }) => {
+		set.headers["content-type"] = "text/html; charset=utf-8";
+
+		return `<!doctype html>
+			<html lang="en">
+				<head>
+					<meta charset="UTF-8" />
+					<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+					<title>Yo Chan</title>
+					<style>
+						html,
+						body {
+							height: 100%;
+							margin: 0;
+							display: grid;
+							place-items: center;
+							background-color: hsl(233, 20%, 92%);
+							font-family: 'Courier New', Courier, monospace;
+							text-align: center;
+							text-wrap: balance;
+							color: hsl(233, 80%, 40%);
+						}
+					</style>
+				</head>
+				<body>
+					<h1>👋🦭 Yo Chan is running and ready to gyu!</h1>
+				</body>
+			</html>`;
+	})
 	.get("/uploads/*", async ({ params: { "*": url } }) => {
 		const filePath = path.join(config.UPLOADS_DIR, url);
 
@@ -310,6 +311,6 @@ const app = new Elysia()
 
 		return status(200, SuccessResponse(folders));
 	})
-	.listen(config.PORT, (server) => {
-		console.log(`👋🦭  Yo Chan is running at ${server.url} and ready to gyu!`);
+	.listen(config.PORT, ({ url }) => {
+		console.log(`👋🦭  Yo Chan is running at ${url} and ready to gyu!`);
 	});
